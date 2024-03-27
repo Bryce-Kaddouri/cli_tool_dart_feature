@@ -5,10 +5,24 @@ String getRepositoryTemplate(String featureName) {
   String content = File('templates/repository_template.dart').readAsStringSync();
   // replace all placeholder with featureName
   // snake_case to CamelCase
+  content = content.replaceAll('feature_name', featureName);
+
   featureName = featureName.split('_').map((word) => word[0].toUpperCase() + word.substring(1)).join();
   content = content.replaceAll('FeatureName', featureName);
 
   print('Repository template generated successfully');
+  return content;
+}
+
+String getModelTemplate(String featureName) {
+  // read content file from cli_tool/templates/model_template.dart
+  String content = File('templates/model_template.dart').readAsStringSync();
+  // replace all placeholder with featureName
+  // snake_case to CamelCase
+  featureName = featureName.split('_').map((word) => word[0].toUpperCase() + word.substring(1)).join();
+  content = content.replaceAll('FeatureName', featureName);
+
+  print('Model template generated successfully');
   return content;
 }
 
@@ -17,6 +31,7 @@ String getDataSourceTemplate(String featureName) {
   String content = File('templates/datasource_template.dart').readAsStringSync();
   // replace all placeholder with featureName
   // snake_case to CamelCase
+  content = content.replaceAll('feature_name', featureName);
   featureName = featureName.split('_').map((word) => word[0].toUpperCase() + word.substring(1)).join();
   content = content.replaceAll('FeatureName', featureName);
 
