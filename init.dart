@@ -14,17 +14,17 @@ String businessPath = "$featurePath/business";
 String dataPath = "$featurePath/data";
 String presentationPath = "$featurePath/presentation";
 
-List<Type> allDartTypes = [
-  String,
-  int,
-  double,
-  bool,
-  List,
-  Map,
-  Set,
-  DateTime,
-  Object,
-  Null,
+List<String> allDartTypes = [
+  "String",
+  "int",
+  "double",
+  "bool",
+  "List",
+  "Map",
+  "Set",
+  "DateTime",
+  "Object",
+  "Null",
 ];
 
 List<FolderObject> folders = [
@@ -249,17 +249,20 @@ bool checkValidType(String value) {
   // check that the type is valid
   // regex to get all type (e.g List<Map<String, dynamic>> => [List, Map, String, dynamic] or List<String> => [List, String] or int => [int])
   List<String> allModels = getAllModels(getAllFeatures());
-  List<String> allDartTypeStrings = allDartTypes.map((Type type) => type.toString()).toList();
+  List<String> allDartTypeStrings = allDartTypes.map((String type) => type).toList();
   allDartTypeStrings.addAll(allModels);
-  print(allModels);
+  print(allDartTypeStrings);
 
   List<String> words = value.split(RegExp(r'[<>, ]')).where((String word) => word.isNotEmpty).toList();
+  print(words);
   bool isValid = true;
-  words.forEach((String word) {
+  for (var word in words) {
+    // remove spaces
+    word = word.trim();
     if (!allDartTypeStrings.contains(word)) {
       isValid = false;
     }
-  });
+  }
   return isValid;
 }
 
@@ -539,6 +542,17 @@ class ${camelCaseFeatureName}${methodName[0].toUpperCase()}${methodName.substrin
   String importUsecase = "import '../../business/usecase/${featureName}_${methodNameSnakeCase}_usecase.dart';";
   String declaration = "final ${camelCaseFeatureName}${methodNameCamelCase}Usecase ${methodNameCamelCase.substring(0, 1).toLowerCase()}${methodNameCamelCase.substring(1)}Usecase;";
   String requiredConstructor = "required this.${methodNameCamelCase.substring(0, 1).toLowerCase()}${methodNameCamelCase.substring(1)}Usecase,";
+  String methodProvider = """
+  Future<$returnType?> $methodNameCamelCase($parameterType $parameterName) async {
+    ${methodName}Usecase.call($parameterName).then((value) {
+      value.fold((l) {
+        print(l.errorMessage);
+      }, (r) {
+        // do something with the result
+      });
+    });
+}
+  """;
 
   // add import
   presentationProviderContent = "$importUsecase\n" + presentationProviderContent;
@@ -555,6 +569,9 @@ class ${camelCaseFeatureName}${methodName[0].toUpperCase()}${methodName.substrin
     print("-" * 50);
     print(lines[i]);
   }
+
+  // search the last } to add the method before the last }
+  finalProviderContent = finalProviderContent.substring(0, finalProviderContent.lastIndexOf("}")) + methodProvider + "\n}";
 
   presentationProvider.writeAsStringSync(finalProviderContent);
 
